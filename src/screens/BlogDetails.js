@@ -7,7 +7,6 @@ const BlogDetails = ({navigation})=> {
     const id = navigation.getParam('id')
     const {state} = useContext(Context)
     const blogPost = state.find(blogPost => blogPost.id === id)
-    console.log(blogPost);
     return <View>
         <Text>{blogPost.title}</Text>
         <Text>{blogPost.content}</Text>
@@ -18,7 +17,7 @@ const BlogDetails = ({navigation})=> {
 BlogDetails.navigationOptions = ({navigation}) => {
     return {
         headerRight: () => (
-          <TouchableOpacity onPress={() => navigation.navigate('CreateScreen')}>
+          <TouchableOpacity onPress={() => navigation.navigate('EditScreen', { id : navigation.getParam('id')})}>
             <EvilIcons name="pencil" size={30} />
           </TouchableOpacity>
         ),

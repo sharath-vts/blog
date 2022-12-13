@@ -1,16 +1,30 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import { Button, FlatList, StyleSheet, Text, View } from "react-native";
 import {Context} from "../contexts/BlogContext";
 import { EvilIcons, Feather } from '@expo/vector-icons';
 import { TouchableOpacity } from "react-native-gesture-handler";
 
 const IndexScreen = ({navigation}) => {
-    const {state, deleteBlogPost} = useContext(Context)
+    const {state, deleteBlogPost, getBlogPosts} = useContext(Context)
+
+    useEffect(() => {
+        getBlogPosts()
+        const listener = navigation.addListener('didFocus', () => {
+            getBlogPosts()
+        })
+
+        // it acts like deinit method
+        return () => {
+            listener.remove()
+        }
+        
+    }, [])
     return <View>
         <FlatList 
             data={state}    
-            keyExtractor = {(blogPost) => blogPost.title}
+            keyExtractor = {(blogPost) => blogPost.id}
             renderItem = {({item}) => {
+                console.log(item)
                 return (
                     <TouchableOpacity onPress={() => navigation.navigate('BlogDetails', {id: item.id})}>
                         <View style = {styles.row}>

@@ -1,15 +1,28 @@
 import React, { useReducer, useState } from "react";
+import jsonserver from "../api/jsonserver";
 import createDataContext from "./createDataContext";
 
+const getBlogPosts = (dispatch) => {
+    return async () => {
+        try {
+            const response = await jsonserver.get('/blogposts')
+            dispatch({type: 'get_blogPosts', payload: response.data})    
+        } catch (error) {
+            console.log(error);
+        }
+    }
+}
 
 const deleteBlogPost = (dispatch) => {
-    return (id) => {
+    return async (id) => {
+        await jsonserver.delete(`/blogposts/${id}`)
         dispatch({type: 'delete_blogPost', payload: id})
     }
 }
 
 const editBlogPost = (dispatch) => {
-    return (id, title, content, callback) => {
+    return async (id, title, content, callback) => {
+        await jsonserver.put(`/blogposts/${id}`, {title,content})
         dispatch({type: 'edit_blogPost',
                  payload: {
                     id,
@@ -21,18 +34,16 @@ const editBlogPost = (dispatch) => {
 }
 
 const addBlogPost = (dispatch) => {
-    return (title, content, callback) => {
-        dispatch({type: 'add_blogPost', 
-                payload: {
-                    title: title,
-                    content: content
-                }})
+    return async (title, content, callback) => {
+        await jsonserver.post('/blogposts', {title, content})
         callback()
     }
 }
 
 const reducer = (state, action) => {
     switch (action.type) {
+        case 'get_blogPosts':
+            return action.payload
         case 'edit_blogPost':
             return state.map((blogPost) => {
                 if (blogPost.id === action.payload.id) {
@@ -41,13 +52,6 @@ const reducer = (state, action) => {
                     return blogPost
                 }
             })
-        case 'add_blogPost':
-            return [...state, 
-                { 
-                    id: Math.floor(Math.random() * 99999),
-                    title: action.payload.title,
-                    content: action.payload.content 
-                }]
         case 'delete_blogPost':
             return state.filter(blogPost => blogPost.id !== action.payload)
         default:
@@ -56,6 +60,5 @@ const reducer = (state, action) => {
 }
 
 export const {Context, Provider} = createDataContext(reducer, 
-                                                    {addBlogPost, deleteBlogPost, editBlogPost}, 
-                                                    [{title: 'Movies', content: 'RRR', id: 1}]
-                                                    )
+                                                    {addBlogPost, deleteBlogPost, editBlogPost, getBlogPosts}, 
+                                                    [])
